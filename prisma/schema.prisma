@@ -5,8 +5,7 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client"
-  output   = "../generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
@@ -20,6 +19,39 @@ model User {
   name      String
   password  String
   role      Role   @default(USER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Train {
+  id        String   @id @default(uuid())
+  trainNumber      String @unique
+  totalSeats      Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  routes Route[]
+}
+
+model Route {
+  id        String   @id @default(uuid())
+  trainId String
+  train Train @relation(fields: [trainId], references: [id])
+  departureDateTime DateTime
+  basePrice Decimal
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  stops Stop[]
+}
+
+model Stop {
+  id        String   @id @default(uuid())
+  routeId String
+  route Route @relation(fields: [routeId], references: [id])
+  stationName String
+  arrivalDateTime DateTime
+  departureDateTime DateTime
+  stopNumber Int
+  priceFromStart Decimal
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
