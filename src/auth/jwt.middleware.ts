@@ -11,6 +11,16 @@ export class JwtMiddleware implements NestMiddleware {
   constructor(private jwtService: JwtService) {}
 
   use(req: Request, res: Response, next: NextFunction) {
+    const publicRoutes = ['/api/auth/login', '/api/auth/register'];
+    const currentPath = req.originalUrl || req.path || req.baseUrl;
+    const isPublicRoute = publicRoutes.some((route) =>
+      currentPath.startsWith(route),
+    );
+
+    if (isPublicRoute) {
+      return next();
+    }
+
     try {
       const token = req.headers.authorization?.split(' ')[1];
       if (!token) {

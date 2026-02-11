@@ -1,10 +1,13 @@
+import { Type } from 'class-transformer';
 import {
   IsNotEmpty,
-  IsNumber,
   IsString,
   IsUUID,
   IsDate,
+  ValidateNested,
+  IsArray,
 } from 'class-validator';
+import { CreateStopDto } from 'src/stops/dto/create-stop.dto';
 
 export class CreateRouteDto {
   @IsString()
@@ -16,7 +19,9 @@ export class CreateRouteDto {
   @IsNotEmpty()
   departureDateTime: Date;
 
-  @IsNumber()
+  @IsArray()
   @IsNotEmpty()
-  basePrice: number;
+  @ValidateNested({ each: true })
+  @Type(() => CreateStopDto)
+  stops: CreateStopDto[];
 }

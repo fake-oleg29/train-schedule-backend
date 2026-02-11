@@ -3,14 +3,12 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
   Delete,
   Query,
 } from '@nestjs/common';
 import { RoutesService } from './routes.service';
 import { CreateRouteDto } from './dto/create-route.dto';
-import { UpdateRouteDto } from './dto/update-route.dto';
 
 @Controller('routes')
 export class RoutesController {
@@ -25,8 +23,10 @@ export class RoutesController {
   findAll(
     @Query('from') fromStation?: string,
     @Query('to') toStation?: string,
+    @Query('date') date?: string,
   ) {
-    return this.routesService.findAll(fromStation, toStation);
+    const dateObj = date ? new Date(date) : undefined;
+    return this.routesService.findAll(fromStation, toStation, dateObj);
   }
 
   @Get(':id')
@@ -34,10 +34,10 @@ export class RoutesController {
     return this.routesService.findOne(id);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateRouteDto: UpdateRouteDto) {
-    return this.routesService.update(id, updateRouteDto);
-  }
+  // @Patch(':id')
+  // update(@Param('id') id: string, @Body() updateRouteDto: UpdateRouteDto) {
+  //   return this.routesService.update(id, updateRouteDto);
+  // }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
