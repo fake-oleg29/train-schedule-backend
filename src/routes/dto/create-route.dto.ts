@@ -7,7 +7,7 @@ import {
   ValidateNested,
   IsArray,
 } from 'class-validator';
-import { CreateStopDto } from 'src/stops/dto/create-stop.dto';
+import { CreateStopDto } from '../../stops/dto/create-stop.dto';
 
 export class CreateRouteDto {
   @IsString()
