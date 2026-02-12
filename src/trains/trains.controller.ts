@@ -6,12 +6,16 @@ import {
   Patch,
   Param,
   Delete,
+  UseGuards,
 } from '@nestjs/common';
 import { TrainsService } from './trains.service';
 import { CreateTrainDto } from './dto/create-train.dto';
 import { UpdateTrainDto } from './dto/update-train.dto';
+import { AdminGuard } from 'src/guards/admin.guard';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 
 @Controller('trains')
+@UseGuards(JwtAuthGuard, AdminGuard)
 export class TrainsController {
   constructor(private readonly trainsService: TrainsService) {}
 

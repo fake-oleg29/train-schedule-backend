@@ -234,21 +234,6 @@ export class RoutesService {
     });
   }
 
-  // update(id: string, updateRouteDto: UpdateRouteDto) {
-  //   return this.prisma.route.update({
-  //     where: { id },
-  //     data: updateRouteDto,
-  //     include: {
-  //       train: true,
-  //       stops: {
-  //         orderBy: {
-  //           stopNumber: 'asc',
-  //         },
-  //       },
-  //     },
-  //   });
-  // }
-
   remove(id: string) {
     return this.prisma.route.delete({
       where: { id },

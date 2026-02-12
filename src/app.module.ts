@@ -3,7 +3,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { TrainsModule } from './trains/trains.module';
-import { JwtMiddleware } from './auth/jwt.middleware';
+import { JwtMiddleware } from './auth/middleware';
 import { JwtModule } from '@nestjs/jwt';
 import { RoutesModule } from './routes/routes.module';
 import { PrismaModule } from './prisma/prisma.module';

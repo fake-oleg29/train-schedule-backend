@@ -6,12 +6,16 @@ import {
   Patch,
   Param,
   Delete,
+  UseGuards,
 } from '@nestjs/common';
 import { StopsService } from './stops.service';
 import { CreateStopDto } from './dto/create-stop.dto';
 import { UpdateStopDto } from './dto/update-stop.dto';
+import { AdminGuard } from 'src/guards/admin.guard';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 
 @Controller('stops')
+@UseGuards(JwtAuthGuard, AdminGuard)
 export class StopsController {
   constructor(private readonly stopsService: StopsService) {}
 
