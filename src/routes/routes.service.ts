@@ -53,28 +53,30 @@ export class RoutesService {
     const conditions: any[] = [];
 
     if (fromStation && toStation) {
-      conditions.push(
-        {
-          stops: {
-            some: {
-              stationName: {
-                contains: fromStation,
-                mode: 'insensitive',
+      conditions.push({
+        AND: [
+          {
+            stops: {
+              some: {
+                stationName: {
+                  contains: fromStation,
+                  mode: 'insensitive',
+                },
               },
             },
           },
-        },
-        {
-          stops: {
-            some: {
-              stationName: {
-                contains: toStation,
-                mode: 'insensitive',
+          {
+            stops: {
+              some: {
+                stationName: {
+                  contains: toStation,
+                  mode: 'insensitive',
+                },
               },
             },
           },
-        },
-      );
+        ],
+      });
     } else if (fromStation || toStation) {
       const stationName = fromStation || toStation;
       conditions.push({
@@ -116,35 +118,32 @@ export class RoutesService {
       },
     });
 
-    return routes.map((route) => {
-      const sortedStops = route.stops.sort(
-        (a, b) => Number(a.stopNumber) - Number(b.stopNumber),
-      );
-
-      if (!sortedStops || sortedStops.length === 0) {
-        return {
-          ...route,
-          stops: [],
-          ticketPrice: 0,
-          startStation: null,
-          endStation: null,
-          duration: null,
-        };
-      }
-
-      let filteredStops = sortedStops;
-      let startStop = sortedStops[0];
-      let endStop = sortedStops[sortedStops.length - 1];
-
-      if (fromStation && toStation) {
-        const fromStopIndex = sortedStops.findIndex((stop) =>
-          stop.stationName.toLowerCase().includes(fromStation.toLowerCase()),
-        );
-        const toStopIndex = sortedStops.findIndex((stop) =>
-          stop.stationName.toLowerCase().includes(toStation.toLowerCase()),
+    return routes
+      .map((route) => {
+        const sortedStops = route.stops.sort(
+          (a, b) => Number(a.stopNumber) - Number(b.stopNumber),
         );
 
-        if (fromStopIndex !== -1 && toStopIndex !== -1) {
+        if (!sortedStops || sortedStops.length === 0) {
+          return null;
+        }
+
+        let filteredStops = sortedStops;
+        let startStop = sortedStops[0];
+        let endStop = sortedStops[sortedStops.length - 1];
+
+        if (fromStation && toStation) {
+          const fromStopIndex = sortedStops.findIndex((stop) =>
+            stop.stationName.toLowerCase().includes(fromStation.toLowerCase()),
+          );
+          const toStopIndex = sortedStops.findIndex((stop) =>
+            stop.stationName.toLowerCase().includes(toStation.toLowerCase()),
+          );
+
+          if (fromStopIndex === -1 || toStopIndex === -1) {
+            return null;
+          }
+
           const fromStopNumber = Number(sortedStops[fromStopIndex].stopNumber);
           const toStopNumber = Number(sortedStops[toStopIndex].stopNumber);
           const lastStopNumber = Number(
@@ -172,52 +171,48 @@ export class RoutesService {
             endStop = sortedStops[toStopIndex];
           }
         }
-      }
-      if (!startStop || !endStop) {
+
+        if (!startStop || !endStop) {
+          return null;
+        }
+
+        const startPrice = Number(startStop.priceFromStart);
+        const endPrice = Number(endStop.priceFromStart);
+        const ticketPrice = Math.abs(endPrice - startPrice);
+
+        const departureTime = new Date(startStop.departureDateTime as Date);
+        const arrivalTime = new Date(endStop.arrivalDateTime as Date);
+        const durationMs = arrivalTime.getTime() - departureTime.getTime();
+
+        const hours = Math.floor(durationMs / (1000 * 60 * 60));
+        const minutes = Math.floor(
+          (durationMs % (1000 * 60 * 60)) / (1000 * 60),
+        );
+        const duration = {
+          totalMinutes: Math.floor(durationMs / (1000 * 60)),
+          hours,
+          minutes,
+          formatted: `${hours} hour ${minutes} minutes`,
+        };
+
         return {
           ...route,
           stops: filteredStops,
-          ticketPrice: 0,
-          startStation: null,
-          endStation: null,
-          duration: null,
+          ticketPrice,
+          startStation: {
+            id: startStop.id,
+            name: startStop.stationName,
+            departureDateTime: startStop.departureDateTime,
+          },
+          endStation: {
+            id: endStop.id,
+            name: endStop.stationName,
+            arrivalDateTime: endStop.arrivalDateTime,
+          },
+          duration,
         };
-      }
-
-      const startPrice = Number(startStop.priceFromStart);
-      const endPrice = Number(endStop.priceFromStart);
-      const ticketPrice = Math.abs(endPrice - startPrice);
-
-      const departureTime = new Date(startStop.departureDateTime as Date);
-      const arrivalTime = new Date(endStop.arrivalDateTime as Date);
-      const durationMs = arrivalTime.getTime() - departureTime.getTime();
-
-      const hours = Math.floor(durationMs / (1000 * 60 * 60));
-      const minutes = Math.floor((durationMs % (1000 * 60 * 60)) / (1000 * 60));
-      const duration = {
-        totalMinutes: Math.floor(durationMs / (1000 * 60)),
-        hours,
-        minutes,
-        formatted: `${hours} hour ${minutes} minutes`,
-      };
-
-      return {
-        ...route,
-        stops: filteredStops,
-        ticketPrice,
-        startStation: {
-          id: startStop.id,
-          name: startStop.stationName,
-          departureDateTime: startStop.departureDateTime,
-        },
-        endStation: {
-          id: endStop.id,
-          name: endStop.stationName,
-          arrivalDateTime: endStop.arrivalDateTime,
-        },
-        duration,
-      };
-    });
+      })
+      .filter((route) => route !== null);
   }
 
   findOne(id: string) {
