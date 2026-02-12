@@ -8,6 +8,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { RoutesModule } from './routes/routes.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { StopsModule } from './stops/stops.module';
+import { TicketsModule } from './tickets/tickets.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { StopsModule } from './stops/stops.module';
     }),
     RoutesModule,
     StopsModule,
+    TicketsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

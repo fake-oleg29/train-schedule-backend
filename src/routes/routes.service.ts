@@ -206,10 +206,12 @@ export class RoutesService {
         stops: filteredStops,
         ticketPrice,
         startStation: {
+          id: startStop.id,
           name: startStop.stationName,
           departureDateTime: startStop.departureDateTime,
         },
         endStation: {
+          id: endStop.id,
           name: endStop.stationName,
           arrivalDateTime: endStop.arrivalDateTime,
         },
