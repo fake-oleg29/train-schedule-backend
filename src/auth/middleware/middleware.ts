@@ -1,32 +1,38 @@
 import {
   Injectable,
-  CanActivate,
-  ExecutionContext,
+  NestMiddleware,
   UnauthorizedException,
 } from '@nestjs/common';
+import { Request, Response, NextFunction } from 'express';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../../prisma/prisma.service';
 
 @Injectable()
-export class JwtAuthGuard implements CanActivate {
+export class JwtMiddleware implements NestMiddleware {
   constructor(
     private jwtService: JwtService,
     private prisma: PrismaService,
   ) {}
 
-  async canActivate(context: ExecutionContext): Promise<boolean> {
-    const request = context.switchToHttp().getRequest();
-    const token = request.headers.authorization?.split(' ')[1];
+  async use(req: Request, res: Response, next: NextFunction) {
+    const publicRoutes = ['/api/auth/login', '/api/auth/register'];
+    const currentPath = req.originalUrl || req.path || req.baseUrl;
+    const isPublicRoute = publicRoutes.some((route) =>
+      currentPath.startsWith(route),
+    );
 
-    if (!token) {
-      throw new UnauthorizedException('Token is missing');
+    if (isPublicRoute) {
+      return next();
     }
 
     try {
-      const decoded = this.jwtService.verify(token as string, {
+      const token = req.headers.authorization?.split(' ')[1];
+      if (!token) {
+        throw new UnauthorizedException('Token is missing');
+      }
+      const decoded = this.jwtService.verify(token, {
         secret: process.env.JWT_SECRET!,
       });
-
       if (!decoded) {
         throw new UnauthorizedException('Invalid token');
       }
@@ -45,11 +51,14 @@ export class JwtAuthGuard implements CanActivate {
         throw new UnauthorizedException('User not found');
       }
 
-      request.user = user;
-      return true;
-    } catch (error) {
+      req['user'] = user;
+      next();
+    } catch (error: unknown) {
       if (error instanceof UnauthorizedException) {
         throw error;
+      }
+      if (error instanceof Error) {
+        throw new UnauthorizedException(error.message);
       }
       throw new UnauthorizedException('Invalid or expired token');
     }

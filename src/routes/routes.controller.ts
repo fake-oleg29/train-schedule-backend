@@ -6,11 +6,14 @@ import {
   Param,
   Delete,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { RoutesService } from './routes.service';
 import { CreateRouteDto } from './dto/create-route.dto';
+import { AdminGuard } from '../auth/guards/admin.guard';
 
 @Controller('routes')
+@UseGuards(AdminGuard)
 export class RoutesController {
   constructor(private readonly routesService: RoutesService) {}
 

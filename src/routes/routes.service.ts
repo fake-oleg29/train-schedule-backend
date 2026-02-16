@@ -77,18 +77,6 @@ export class RoutesService {
           },
         ],
       });
-    } else if (fromStation || toStation) {
-      const stationName = fromStation || toStation;
-      conditions.push({
-        stops: {
-          some: {
-            stationName: {
-              contains: stationName,
-              mode: 'insensitive',
-            },
-          },
-        },
-      });
     }
 
     if (date) {

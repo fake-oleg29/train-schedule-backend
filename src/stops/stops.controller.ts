@@ -11,11 +11,10 @@ import {
 import { StopsService } from './stops.service';
 import { CreateStopDto } from './dto/create-stop.dto';
 import { UpdateStopDto } from './dto/update-stop.dto';
-import { AdminGuard } from '../guards/admin.guard';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { AdminGuard } from '../auth/guards/admin.guard';
 
 @Controller('stops')
-@UseGuards(JwtAuthGuard, AdminGuard)
+@UseGuards(AdminGuard)
 export class StopsController {
   constructor(private readonly stopsService: StopsService) {}
 
